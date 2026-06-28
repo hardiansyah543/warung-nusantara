@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Warung Nusantara</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+body{
+    background:#f5f7fb;
+}
+
+.hero{
+    background:linear-gradient(135deg,#198754,#157347);
+    color:white;
+    border-radius:20px;
+    padding:40px;
+}
+
+.card-menu{
+    transition:.3s;
+    border:none;
+    border-radius:15px;
+}
+
+.card-menu:hover{
+    transform:translateY(-5px);
+}
+
+.price{
+    color:#198754;
+    font-weight:bold;
+    font-size:20px;
+}
+
+.section-title{
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.order-card{
+    border-left:5px solid #ffc107;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container py-4">
+
+    <div class="hero shadow mb-4">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-8">
+
+                <h1 class="fw-bold">
+                    <i class="bi bi-shop"></i>
+                    Warung Nusantara
+                </h1>
+
+                <p class="mb-0">
+                    Sistem Pemesanan Restoran Berbasis Firebase Realtime Database
+                </p>
+
+            </div>
+
+            <div class="col-md-4 text-md-end">
+
+                <div id="hasil" class="alert alert-light mb-0">
+                    Menghubungkan Firebase...
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h3 class="section-title">
+                        <i class="bi bi-grid-fill"></i>
+                        Daftar Menu
+                    </h3>
+
+                    <div class="row" id="menu-list"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h3 class="section-title">
+                        <i class="bi bi-cart-plus"></i>
+                        Buat Pesanan
+                    </h3>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Pelanggan</label>
+                        <select id="customerId" class="form-select">
+                            <option value="customer_001">ADAM ANDIKA SUKMA</option>
+                            <option value="customer_002">ANDIKA DWI SANTOSO</option>
+                            <option value="customer_003">LAILATUL NUR AIFA RAHMA</option>
+                            <option value="customer_004">MUHAMMAD YOGI ANTORO</option>
+                            <option value="customer_005">NELA ULIVATUL ZAHRO MAUL</option>
+                            <option value="customer_006">SITI MASITO</option>
+                            <option value="customer_007">UHTI AMELIA</option>
+                            <option value="customer_008">YAZKAA ZAHAA DZAKIYAH</option>
+                            <option value="customer_009">DARA PUTRI NATA SUKMA</option>
+                            <option value="customer_010">JOENED SASTRA</option>
+                            <option value="customer_011">MUHAMMAD AMRULLOH</option>
+                            <option value="customer_012">ALDIYOFANI AZZAHWA</option>
+                            <option value="customer_013">ALFIN NUR HIDAYATULLOH</option>
+                            <option value="customer_014">AUREL PRAYOGA</option>
+                            <option value="customer_015">CANDRA ARDIANSYAH</option>
+                            <option value="customer_016">DENIS MAWAR SANIA</option>
+                            <option value="customer_017">HARDIANSYAH</option>
+                            <option value="customer_018">MIRZA FAHMI</option>
+                            <option value="customer_019">MUHAMMAD VALLENTINO AKBAR</option>
+                            <option value="customer_020">MUHAMMAD TEDDY RAMADHAN</option>
+                            <option value="customer_021">ASYKARIL KAFIFULLOH</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Restoran</label>
+                        <select id="restaurantId" class="form-select">
+                            <option value="resto_jombang">Warung Nusantara Jombang</option>
+                            <option value="resto_kediri">Warung Nusantara Kediri</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nomor Meja</label>
+                        <input type="number" id="tableNumber" class="form-control" placeholder="Masukkan nomor meja">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Menu</label>
+                        <select id="menuName" class="form-select">
+                            <!-- diisi otomatis dari Firebase berdasarkan restoran terpilih -->
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" id="qty" class="form-control" value="1" min="1">
+                    </div>
+
+                    <button id="btnPesan" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle"></i>
+                        Simpan Pesanan
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-sm border-0 mt-4">
+
+            <div class="card-body">
+
+                <h3 class="section-title">
+                    <i class="bi bi-fire"></i>
+                    Dashboard Dapur
+                </h3>
+
+                <div id="orders" class="row"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCeLfh89ZPbws5Q-NurGXXyNIVStcZo3H0",
+    authDomain: "warung-nusantara-a081a.firebaseapp.com",
+    databaseURL: "https://warung-nusantara-a081a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "warung-nusantara-a081a",
+    storageBucket: "warung-nusantara-a081a.firebasestorage.app",
+    messagingSenderId: "313079261",
+    appId: "1:313079261:web:4fddbfccc178e97e8b3234",
+    measurementId: "G-SCESXNR33Q"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+document.getElementById("hasil").textContent = "✅ Firebase Terhubung";
+
+const restaurantSelect = document.getElementById("restaurantId");
+const menuListEl = document.getElementById("menu-list");
+const menuNameEl = document.getElementById("menuName");
+const ordersEl = document.getElementById("orders");
+
+let lastMenuMap = new Map(); // menuName -> { menuId, price }
+
+function money(n){
+    return `Rp ${Number(n).toLocaleString()}`;
+}
+
+function renderMenuSnapshot(snapshot){
+    let html = "";
+    lastMenuMap = new Map();
+
+    snapshot.forEach((child)=>{
+        const menuId = child.key;
+        const menu = child.val();
+        if(!menu) return;
+
+        lastMenuMap.set(menu.name, { menuId, price: Number(menu.price) });
+
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card card-menu shadow-sm">
+                    <img src="${menu.imageUrl}" class="card-img-top" style="height:180px;object-fit:cover;">
+                    <div class="card-body">
+                        <h5>${menu.name}</h5>
+                        <p>${menu.category ?? ""}</p>
+                        <div class="price">${money(menu.price)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    menuListEl.innerHTML = html;
+}
+
+function syncMenuDropdown(snapshot){
+    menuNameEl.innerHTML = "";
+
+    snapshot.forEach((child)=>{
+        const menu = child.val();
+        if(!menu) return;
+        const option = document.createElement("option");
+        option.value = menu.name;
+        option.textContent = `${menu.name} - ${money(menu.price)}`;
+        menuNameEl.appendChild(option);
+    });
+}
+
+function loadMenu(restoId){
+    const menuRef = ref(db, `restaurants/${restoId}/menus`);
+
+    onValue(menuRef, (snapshot)=>{
+        renderMenuSnapshot(snapshot);
+        syncMenuDropdown(snapshot);
+    });
+}
+
+loadMenu(restaurantSelect.value);
+
+restaurantSelect.addEventListener("change", (e)=>{
+    loadMenu(e.target.value);
+});
+
+// simpan pesanan
+
+document.getElementById("btnPesan").addEventListener("click", async ()=>{
+    const customerId = document.getElementById("customerId").value;
+    const restaurantId = document.getElementById("restaurantId").value;
+    const tableNumber = Number(document.getElementById("tableNumber").value);
+    const menuName = document.getElementById("menuName").value;
+    const qty = Number.parseInt(document.getElementById("qty").value, 10);
+
+    if(!customerId) return alert("Pilih nama pelanggan");
+    if(!restaurantId) return alert("Pilih restoran");
+    if(!Number.isFinite(tableNumber) || tableNumber <= 0) return alert("Masukkan nomor meja yang valid");
+    if(!menuName) return alert("Pilih menu");
+    if(!Number.isFinite(qty) || qty <= 0) return alert("Jumlah harus lebih dari 0");
+
+    const cached = lastMenuMap.get(menuName);
+    if(!cached) return alert("Menu tidak ditemukan pada restoran ini");
+
+    // ambil data menu terbaru (agar price akurat)
+    const menuRef = ref(db, `restaurants/${restaurantId}/menus/${cached.menuId}`);
+    const snap = await get(menuRef);
+    const menu = snap.val();
+
+    if(!menu || !menu.price) return alert("Harga menu belum tersedia");
+
+    const unitPrice = Number(menu.price);
+    const menuId = cached.menuId;
+
+    const ordersRef = ref(db, "orders");
+    const newOrder = push(ordersRef);
+
+    await set(newOrder, {
+        customerId,
+        restaurantId,
+        tableNumber,
+        status: "pending",
+        totalPrice: qty * unitPrice,
+        createdAt: new Date().toISOString(),
+        orderItems: {
+            item_001: {
+                menuId,
+                menuName,
+                qty,
+                unitPrice,
+                subtotal: qty * unitPrice
+            }
+        }
+    });
+
+    alert("Pesanan berhasil disimpan");
+});
+
+// dashboard dapur: tampilkan order sesuai restoran terpilih
+let currentRestaurantId = restaurantSelect.value;
+
+function renderOrders(snapshot){
+    let html = "";
+
+    snapshot.forEach((child)=>{
+        const order = child.val();
+        if(order?.restaurantId !== currentRestaurantId) return;
+
+        html += `
+            <div class="col-md-4 mb-3">
+                <div class="card order-card">
+                    <div class="card-body">
+                        <h5>Meja ${order.tableNumber}</h5>
+                        <p>
+                            Status :
+                            <span class="badge bg-warning">${order.status}</span>
+                        </p>
+                        <p>Total : ${money(order.totalPrice)}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    ordersEl.innerHTML = html;
+}
+
+const orderRef = ref(db, "orders");
+onValue(orderRef, (snapshot)=>{
+    renderOrders(snapshot);
+});
+
+restaurantSelect.addEventListener("change", ()=>{
+    currentRestaurantId = restaurantSelect.value;
+});
+
+</script>
+
+</body>
+</html>
+
